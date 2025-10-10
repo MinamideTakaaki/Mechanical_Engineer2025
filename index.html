@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<body>
+	<div class="" id="start_button"></div>
+</body>
+<style>
+	#start_button {
+		width: 100px;
+		height: 100px;
+		background-color: red;
+	}
+</style>
+<script>
+	let beta, gamma; //x,y軸の傾き値
+	let angle=[], reference=[]; //戻り値用の配列
+
+	// 画面の傾きを取得する
+	function handleOrientation(event) {
+  	let event_beta = event.beta; //x軸回転
+		angle[0]=event_beta;
+		let event_gamma = event.gamma; //y軸回転
+		angle[1]=event_gamma;
+		console.log("angle_checker");
+		return angle;
+  }
+
+	// スマホの傾きをローバーの進行方向に変換する
+	function angle_to_direction(reference_beta, reference_gamma, now_beta, now_gamma) {
+		let delta_beta = now_beta - reference_beta;
+		console.log(now_beta, reference_beta, delta_beta, "delta_beta");
+		let delta_gamma = now_gamma - reference_gamma;
+		console.log(delta_gamma, "delta_gamma");
+	}
+
+  window.addEventListener("deviceorientation", handleOrientation, true); //画面の傾きを取得する
+
+	// 開始ボタン
+	document.getElementById("start_button").addEventListener("click", () => {
+		reference[0] = angle[0]; //x軸傾きの基準
+		reference[1] = angle[1]; //y軸傾きの基準
+		console.log(reference, "reference");
+		setInterval(angle_to_direction, 3000, reference[0], reference[1], angle[0], angle[1]);
+		return reference;
+	});
+
+	// setInterval(angle_to_direction, 3000, 10);
+	// setInterval(console.log(reference[0]), 3000);
+
+</script>
+</html>
