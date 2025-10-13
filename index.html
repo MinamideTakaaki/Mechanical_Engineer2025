@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
+	<title>操作ページ</title>
 </head>
 <body>
 	<div id="start_button"></div>
@@ -27,6 +27,7 @@
 	let running=false; //作動状態かどうかの判定.
 	let move_forward, move_right; //前後、左右の移動方向.
 	let last_forward=0, last_right=0; //移動方向の最終値.
+	let tolerance=10; //傾きの誤差設定値
 
 	// 画面の傾きを取得する.
 	function handleOrientation(event) {
@@ -42,18 +43,18 @@
 		if(running) {
 			let delta_beta = angle[0] - reference[0];
 			let delta_gamma = angle[1] - reference[1];
-			if(Math.abs(delta_beta) < 10) {　
+			if(Math.abs(delta_beta) < tolerance) {　
 				move_forward=0; //前後移動無し.
-			} else if(delta_beta <= -10) {
+			} else if(delta_beta <= tolerance*-1) {
 				move_forward=1; //前移動.
-			} else if(delta_beta >= 10) {
+			} else if(delta_beta >= tolerance) {
 				move_forward=-1; //後ろ移動.
 			}
-			if (Math.abs(delta_gamma) < 10) {
+			if (Math.abs(delta_gamma) < tolerance) {
 				move_right=0; //左右移動無し.
-			} else if(delta_gamma <= -10) {
+			} else if(delta_gamma <= tolerance*-1) {
 				move_right=-1; //左移動.
-			} else if(delta_gamma >= 10) {
+			} else if(delta_gamma >= tolerance) {
 				move_right=1; //右移動.
 			}
 			if (move_forward!=last_forward || move_right!=last_right) {
@@ -76,7 +77,7 @@
 		return reference;
 	});
 
-	setInterval(angle_to_direction, 1000);
+	setInterval(angle_to_direction, 1000); //1000msごとに
 
 	document.getElementById("finish_button").addEventListener("click", () => {
 		running=false;
