@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<script>
+ 		// Bluetoothデバイスに接続する非同期関数
+    async function connectBluetooth() {
+      try {
+        // ユーザーにデバイスを選択させ、選択されたデバイスを取得
+        const device = await navigator.bluetooth.requestDevice({
+            filters: [{ services: ["device_information"] }]
+        });
+
+        console.log(device);
+        const server = await device.gatt.connect();
+
+        // 選択されたデバイスに接続
+        const infoService = await server.getPrimaryService("device_information");
+
+        // デバイス情報サービスに接続
+        const characteristics = await infoService.getCharacteristics();
+
+        // サービスの特性を取得
+        const ary = [];
+        // 特性の値を読み取り、デコードして配列に格納
+        for (const characteristic of characteristics) {
+          const value = await characteristic.readValue();
+          ary.push(new TextDecoder().decode(value));
+
+          // 特性値が変更されたときのイベントリスナーを追加
+          characteristic.addEventListener("characteristicvaluechanged", event => {
+            console.log(new TextDecoder().decode(event.target.value));
+          });
+
+          // 通知を開始
+          await characteristic.startNotifications();
+        }
+        // 読み取った特性の値をコンソールに表示
+        console.log(ary);
+      } catch (error) {
+        // エラーが発生した場合、コンソールにエラーを表示
+        console.error(error);
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <button onclick="connectBluetooth()">Connect Bluetooth</button>
+</body>
+
+</html>
