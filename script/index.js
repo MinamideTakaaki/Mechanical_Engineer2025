@@ -1,7 +1,7 @@
 let beta, gamma; //x,y軸の傾き値.
 let angle=[], reference=[]; //戻り値用の配列.
 let running=false; //作動状態かどうかの判定.
-let move_forward, move_right, vehicle_direction, last_vehicle_direction=0; //前後、左右の移動方向と送信する値,最終送信値.
+let move_forward, move_right, vehicle_direction=0, last_vehicle_direction=0; //前後、左右の移動方向と送信する値,最終送信値.
 let screen_direction; //画面の向き(横画面、縦画面).
 let direction_table = [[0,7,8,1,2,3,4,5,6],[0,3,4,5,6,7,8,1,2]];
 let tolerance=10; //傾きの誤差設定値.
@@ -30,7 +30,6 @@ function getOrientation(){
 
 // スマホの傾きをローバーの進行方向に変換する.
 function angle_to_direction() {
-	// getScreen_direction();
 	if(running) {
 		let delta_beta = angle[0] - reference[0];
 		let delta_gamma = angle[1] - reference[1];
@@ -68,7 +67,7 @@ function angle_to_direction() {
 			vehicle_direction=direction_table[screen_direction][8]; //左斜め前.
 		}
 		if (vehicle_direction!= last_vehicle_direction) {
-			// arduinoにmove_forwardとmove_rightの配列を送信.
+			// arduinoにvehicle_directionを送信.
 			console.log(vehicle_direction, "送信");
 			last_vehicle_direction=vehicle_direction; //最終値の更新.
 		}
