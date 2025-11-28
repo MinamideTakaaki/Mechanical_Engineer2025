@@ -3,6 +3,7 @@ let angle=[], reference=[]; //戻り値用の配列.
 let running=false; //作動状態かどうかの判定.
 let move_forward, move_right, vehicle_direction, last_vehicle_direction=0; //前後、左右の移動方向と送信する値,最終送信値.
 let screen_direction; //画面の向き(横画面、縦画面).
+let direction_table = [[0,1,2,3,4,5,6,7,8],[0,5,6,7,8,1,2,3,4]];
 let tolerance=10; //傾きの誤差設定値.
 
 // 画面の傾きを取得する.
@@ -16,18 +17,12 @@ function handleOrientation(event) {
 function getOrientation(){
     let type=screen.orientation.type;
     let ori="";
-    if(type=="portrait-primary"){
-      ori="縦向き(上部が上)";
-    	screen_direction=0;
-    }else if(type=="portrait-secondary"){
-      ori="縦向き(上部が下)";
-      screen_direction=2;
-    }else if(type=="landscape-primary"){
+    if(type=="landscape-primary"){
       ori="横向き(上部が右)";
-      screen_direction=1;
+      screen_direction=0;
     }else if(type=="landscape-secondary"){
       ori="横向き(上部が左)";
-      screen_direction=3;
+      screen_direction=1;
     }
     console.log(ori, screen_direction);
   }
@@ -54,23 +49,23 @@ function angle_to_direction() {
 			move_right=1; //右移動.
 		}
 		if (move_forward==0 && move_right==0) {
-			vehicle_direction=0; //静止.
+			vehicle_direction=direction_table[screen_direction][0]; //静止.
 		} else if (move_forward==1 && move_right==0) {
-			vehicle_direction=1; //前.
+			vehicle_direction=direction_table[screen_direction][1]; //前.
 		} else if (move_forward==1 && move_right==1) {
-			vehicle_direction=2; //右斜め前.
+			vehicle_direction=direction_table[screen_direction][2]; //右斜め前.
 		} else if (move_forward==-0 && move_right==1) {
-			vehicle_direction=3; //右.
+			vehicle_direction=direction_table[screen_direction][3]; //右.
 		} else if (move_forward==-1 && move_right==1) {
-			vehicle_direction=4; //右斜め後ろ.
+			vehicle_direction=direction_table[screen_direction][4]; //右斜め後ろ.
 		}　else if (move_forward==-1 && move_right==0) {
-			vehicle_direction=5; //後ろ
+			vehicle_direction=direction_table[screen_direction][5]; //後ろ.
 		} else if (move_forward==-1 && move_right==-1) {
-			vehicle_direction=6; //左斜め後ろ
+			vehicle_direction=direction_table[screen_direction][6]; //左斜め後ろ.
 		} else if (move_forward==0 && move_right==-1) {
-			vehicle_direction=7; //左
+			vehicle_direction=direction_table[screen_direction][7]; //左.
 		} else if (move_forward==1 && move_right==-1) {
-			vehicle_direction=8;
+			vehicle_direction=direction_table[screen_direction][8]; //左斜め前.
 		}
 		if (vehicle_direction!= last_vehicle_direction) {
 			// arduinoにmove_forwardとmove_rightの配列を送信.
