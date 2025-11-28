@@ -3,7 +3,7 @@ let angle=[], reference=[]; //戻り値用の配列.
 let running=false; //作動状態かどうかの判定.
 let move_forward, move_right, vehicle_direction, last_vehicle_direction=0; //前後、左右の移動方向と送信する値,最終送信値.
 let screen_direction; //画面の向き(横画面、縦画面).
-let direction_table = [[0,1,2,3,4,5,6,7,8],[0,5,6,7,8,1,2,3,4]];
+let direction_table = [[0,7,8,1,2,3,4,5,6],[0,3,4,5,6,7,8,1,2]];
 let tolerance=10; //傾きの誤差設定値.
 
 // 画面の傾きを取得する.
@@ -18,10 +18,10 @@ function getOrientation(){
     let type=screen.orientation.type;
     let ori="";
     if(type=="landscape-primary"){
-      ori="横向き(上部が右)";
+      ori="横向き(上部が左)";
       screen_direction=0;
     }else if(type=="landscape-secondary"){
-      ori="横向き(上部が左)";
+      ori="横向き(上部が右)";
       screen_direction=1;
     }
     console.log(ori, screen_direction);
