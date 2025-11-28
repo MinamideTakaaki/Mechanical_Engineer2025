@@ -1,9 +1,9 @@
 let beta, gamma; //x,y軸の傾き値.
 let angle=[], reference=[]; //戻り値用の配列.
 let running=false; //作動状態かどうかの判定.
-let move_forward, move_right; //前後、左右の移動方向.
-let last_forward=0, last_right=0; //移動方向の最終値.
-let tolerance=10; //傾きの誤差設定値
+let move_forward, move_right, direction; //前後、左右の移動方向と送信する値.
+let last_direction=0; //移動方向の最終値.
+let tolerance=10; //傾きの誤差設定値.
 
 // 画面の傾きを取得する.
 function handleOrientation(event) {
@@ -33,11 +33,29 @@ function angle_to_direction() {
 		} else if(delta_gamma >= tolerance) {
 			move_right=1; //右移動.
 		}
-		if (move_forward!=last_forward || move_right!=last_right) {
+		if (move_forward==0 && move_right==0) {
+			direction=0; //静止.
+		} else if (move_forward==1 && move_right==0) {
+			direction=1; //前.
+		} else if (move_forward==1 && move_right==1) {
+			direction=2; //右斜め前.
+		} else if (move_forward==-0 && move_right==1) {
+			direction=3; //右.
+		} else if (move_forward==-1 && move_right==1) {
+			direction=4; //右斜め後ろ.
+		}　else if (move_forward==-1 && move_right==0) {
+			direction=5; //後ろ
+		} else if (move_forward==-1 && move_right==-1) {
+			direction=6; //左斜め後ろ
+		} else if (move_forward==0 && move_right==-1) {
+			direction=7; //左
+		} else if (move_forward==1 && move_right==-1) {
+			direction=8;
+		}
+		if (direction!= last_direction) {
 			// arduinoにmove_forwardとmove_rightの配列を送信.
-			console.log(move_forward, move_right, "送信");
-			last_forward=move_forward;
-			last_right=move_right;
+			console.log(direction, "送信");
+			last_direction=direction; //最終値の更新.
 		}
 	}
 }
