@@ -1,21 +1,41 @@
 let beta, gamma; //x,y軸の傾き値.
 let angle=[], reference=[]; //戻り値用の配列.
 let running=false; //作動状態かどうかの判定.
-let move_forward, move_right, direction; //前後、左右の移動方向と送信する値.
-let last_direction=0; //移動方向の最終値.
+let move_forward, move_right, vehicle_direction, last_vehicle_direction=0; //前後、左右の移動方向と送信する値,最終送信値.
+let screen_direction; //画面の向き(横画面、縦画面).
 let tolerance=10; //傾きの誤差設定値.
 
 // 画面の傾きを取得する.
 function handleOrientation(event) {
- 	let event_beta = event.beta; //x軸回転.
-	angle[0]=event_beta;
-	let event_gamma = event.gamma; //y軸回転.
-	angle[1]=event_gamma;
+	angle[0]=event.beta; //x軸回転.
+	angle[1]=event.gamma; //y軸回転.
 	return angle;
 }
 
+
+function getOrientation(){
+    let type=screen.orientation.type;
+    let ori="";
+    if(type=="portrait-primary"){
+      ori="縦向き(上部が上)";
+    	screen_direction=0;
+    }else if(type=="portrait-secondary"){
+      ori="縦向き(上部が下)";
+      screen_direction=2;
+    }else if(type=="landscape-primary"){
+      ori="横向き(上部が右)";
+      screen_direction=1;
+    }else if(type=="landscape-secondary"){
+      ori="横向き(上部が左)";
+      screen_direction=3;
+    }
+    console.log(ori, screen_direction);
+  }
+
+
 // スマホの傾きをローバーの進行方向に変換する.
 function angle_to_direction() {
+	// getScreen_direction();
 	if(running) {
 		let delta_beta = angle[0] - reference[0];
 		let delta_gamma = angle[1] - reference[1];
@@ -34,33 +54,42 @@ function angle_to_direction() {
 			move_right=1; //右移動.
 		}
 		if (move_forward==0 && move_right==0) {
-			direction=0; //静止.
+			vehicle_direction=0; //静止.
 		} else if (move_forward==1 && move_right==0) {
-			direction=1; //前.
+			vehicle_direction=1; //前.
 		} else if (move_forward==1 && move_right==1) {
-			direction=2; //右斜め前.
+			vehicle_direction=2; //右斜め前.
 		} else if (move_forward==-0 && move_right==1) {
-			direction=3; //右.
+			vehicle_direction=3; //右.
 		} else if (move_forward==-1 && move_right==1) {
-			direction=4; //右斜め後ろ.
+			vehicle_direction=4; //右斜め後ろ.
 		}　else if (move_forward==-1 && move_right==0) {
-			direction=5; //後ろ
+			vehicle_direction=5; //後ろ
 		} else if (move_forward==-1 && move_right==-1) {
-			direction=6; //左斜め後ろ
+			vehicle_direction=6; //左斜め後ろ
 		} else if (move_forward==0 && move_right==-1) {
-			direction=7; //左
+			vehicle_direction=7; //左
 		} else if (move_forward==1 && move_right==-1) {
-			direction=8;
+			vehicle_direction=8;
 		}
-		if (direction!= last_direction) {
+		if (vehicle_direction!= last_vehicle_direction) {
 			// arduinoにmove_forwardとmove_rightの配列を送信.
-			console.log(direction, "送信");
-			last_direction=direction; //最終値の更新.
+			console.log(vehicle_direction, "送信");
+			last_vehicle_direction=vehicle_direction; //最終値の更新.
 		}
 	}
 }
 
-window.addEventListener("deviceorientation", handleOrientation, true); //画面の傾きを取得する.
+window.addEventListener("deviceorientation", handleOrientation, true); //画面の傾きを取得.
+
+window.addEventListener("load",() => {
+    getOrientation();
+    screen.orientation.onchange= () => {
+    getOrientation();
+  };
+});
+
+
 
 // 開始ボタン.
 document.getElementById("start_button").addEventListener("click", () => {
