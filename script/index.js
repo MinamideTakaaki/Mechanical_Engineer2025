@@ -5,6 +5,8 @@ let move_forward, move_right, vehicle_direction=0, last_vehicle_direction=0; //�
 let screen_direction; //画面の向き(横画面、縦画面).
 let direction_table = [[0,7,8,1,2,3,4,5,6],[0,3,4,5,6,7,8,1,2]];
 let tolerance=10; //傾きの誤差設定値.
+let device = null; //WebBluetoothApiの設定用
+let characteristic;
 
 // 画面の傾きを取得する.
 function handleOrientation(event) {
@@ -68,7 +70,8 @@ function angle_to_direction() {
 		}
 		if (vehicle_direction!= last_vehicle_direction) {
 			// arduinoにvehicle_directionを送信.
-			console.log(vehicle_direction, "送信");
+    	characteristic.writeValue(new TextEncoder().encode(vehicle_direction));
+    	console.log("送信: " + vehicle_direction);
 			last_vehicle_direction=vehicle_direction; //最終値の更新.
 		}
 	}
@@ -99,4 +102,49 @@ setInterval(angle_to_direction, 1000); //1000msごとに
 document.getElementById("finish_button").addEventListener("click", () => {
 	running=false;
 	console.log("finish_button")
+});
+
+
+// WebBluetoothApiで接続
+document.getElementById('connect_button').addEventListener("click", async () => {
+  try {
+    console.log("デバイス検索中...");
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ namePrefix: "HM" }],
+      optionalServices: ["0000ffe0-0000-1000-8000-00805f9b34fb"]
+ 	  });
+
+    console.log("接続中: " + device.name);
+    const server = await device.gatt.connect();
+
+    const service = await server.getPrimaryService("0000ffe0-0000-1000-8000-00805f9b34fb");
+    characteristic = await service.getCharacteristic("0000ffe1-0000-1000-8000-00805f9b34fb");
+
+    console.log("接続完了");
+    console.log(characteristic);
+
+    await characteristic.startNotifications();
+    characteristic.addEventListener('characteristicvaluechanged', (event) => {
+      const value = new TextDecoder().decode(event.target.value);
+      console.log("受信: " + value);
+    });
+
+    const sendText = "Hello from Web";
+    await characteristic.writeValue(new TextEncoder().encode(sendText));
+    console.log("送信: " + sendText);
+
+  } catch (err) {
+    console.log("エラー: " + err);
+  }
+  return characteristic;
+});
+
+// 切断
+document.getElementById('disconnect_button').addEventListener("click", async () => {
+ 	if (device && device.gatt.connected) {
+    device.gatt.disconnect();
+    console.log("切断しました");
+  } else {
+    console.log("既に切断されています");
+  }
 });
