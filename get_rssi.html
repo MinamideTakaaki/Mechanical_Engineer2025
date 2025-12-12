@@ -1,50 +1,34 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <title>HM-10 One-Shot RSSI</title>
-</head>
 <body>
-  <button id="scanBtn">Get RSSI Once</button>
+  <button id="scan">Scan BLE</button>
   <pre id="log"></pre>
 
   <script>
-    function log(msg) {
-      console.log(msg);
-      document.querySelector("#log").textContent += msg + "\n";
-    }
+    const logEl = document.querySelector("#log");
+    const log = (m) => { logEl.textContent += m + "\n"; console.log(m); };
 
-    document.getElementById("scanBtn").addEventListener("click", async () => {
+    document.querySelector("#scan").onclick = async () => {
       try {
-        let scan = await navigator.bluetooth.requestLEScan({
-          filters: [
-            { services: ["0000ffe0-0000-1000-8000-00805f9b34fb"] }
-          ],
-          keepRepeatedDevices: false
+        const scan = await navigator.bluetooth.requestLEScan({
+          acceptAllAdvertisements: true,
+          keepRepeatedDevices: true
         });
 
-        log("Scanning hm-10...");
+        log("Scanning...");
 
-        const handler = (event) => {
-          // HM-10 は名前が "HMSoft"
-          if (event.device.name && event.device.name.includes("HMSoft")) {
-            log("=== HM-10 Detected ===");
-            log("Device: " + event.device.name);
-            log("RSSI: " + event.rssi + " dBm");
-
-            // スキャン停止
-            navigator.bluetooth.removeEventListener("advertisementreceived", handler);
-            scan.stop();
-            log("Scan stopped.");
-          }
-        };
-
-        navigator.bluetooth.addEventListener("advertisementreceived", handler);
+        navigator.bluetooth.addEventListener("advertisementreceived", e => {
+          log("---");
+          log(`Name: ${e.device.name}`);
+          log(`ID: ${e.device.id}`);
+          log(`RSSI: ${e.rssi}`);
+          log(`UUIDs: ${e.uuids}`);
+        });
 
       } catch (err) {
-        log("Error: " + err);
+        log("ERROR: " + err);
       }
-    });
+    };
   </script>
 </body>
 </html>
