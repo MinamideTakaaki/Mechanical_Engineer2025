@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>HM-10 One-Shot RSSI</title>
+</head>
+<body>
+  <button id="scanBtn">Get RSSI Once</button>
+  <pre id="log"></pre>
+
+  <script>
+    function log(msg) {
+      console.log(msg);
+      document.querySelector("#log").textContent += msg + "\n";
+    }
+
+    document.getElementById("scanBtn").addEventListener("click", async () => {
+      try {
+        let scan = await navigator.bluetooth.requestLEScan({
+          filters: [
+            { services: ["0000ffe0-0000-1000-8000-00805f9b34fb"] }
+          ],
+          keepRepeatedDevices: false
+        });
+
+        log("Scanning hm-10...");
+
+        const handler = (event) => {
+          // HM-10 は名前が "HMSoft"
+          if (event.device.name && event.device.name.includes("HMSoft")) {
+            log("=== HM-10 Detected ===");
+            log("Device: " + event.device.name);
+            log("RSSI: " + event.rssi + " dBm");
+
+            // スキャン停止
+            navigator.bluetooth.removeEventListener("advertisementreceived", handler);
+            scan.stop();
+            log("Scan stopped.");
+          }
+        };
+
+        navigator.bluetooth.addEventListener("advertisementreceived", handler);
+
+      } catch (err) {
+        log("Error: " + err);
+      }
+    });
+  </script>
+</body>
+</html>
