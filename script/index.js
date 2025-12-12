@@ -123,11 +123,11 @@ document.getElementById('connect_button').addEventListener("click", async () => 
     console.log("接続完了");
     console.log(characteristic);
 
-    await characteristic.startNotifications();
-    characteristic.addEventListener('characteristicvaluechanged', (event) => {
-      const value = new TextDecoder().decode(event.target.value);
-      console.log("受信: " + value);
-    });
+    // await characteristic.startNotifications();
+    // characteristic.addEventListener('characteristicvaluechanged', (event) => {
+    //   const value = new TextDecoder().decode(event.target.value);
+    //   console.log("受信: " + value);
+    // });
 
     const sendText = "Hello from Web";
     await characteristic.writeValue(new TextEncoder().encode(sendText));
